@@ -116,9 +116,12 @@ type notifyIconData struct {
 	InfoFlags                  uint32
 	GuidItem                   windows.GUID
 	BalloonIcon                windows.Handle
+	m                          sync.Mutex
 }
 
 func (nid *notifyIconData) add() error {
+	nid.m.Lock()
+	defer nid.m.Unlock()
 	const NIM_ADD = 0x00000000
 	res, _, err := pShellNotifyIcon.Call(
 		uintptr(NIM_ADD),
@@ -131,6 +134,9 @@ func (nid *notifyIconData) add() error {
 }
 
 func (nid *notifyIconData) modify() error {
+	nid.m.Lock()
+	defer nid.m.Unlock()
+
 	const NIM_MODIFY = 0x00000001
 	res, _, err := pShellNotifyIcon.Call(
 		uintptr(NIM_MODIFY),
